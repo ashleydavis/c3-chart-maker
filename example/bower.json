@@ -1,0 +1,20 @@
+{
+  "name": "example",
+  "homepage": "https://github.com/codecapers/c3-chart-maker",
+  "authors": [
+    "Ashley Davis <ashley@codecapers.com.au>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "c3": "^0.4.15"
+  }
+}

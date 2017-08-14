@@ -1,0 +1,41 @@
+{
+    "size": {
+        "height": 600,
+        "width": 1200
+    },        
+    "series": {
+        "x": "Date",
+        "Close": "Close",
+        "Volume": "Volume"
+    },
+    "data": {
+        "type": "line",
+        "axes": {
+            "Volume": "y2"
+        },
+        "types": {
+            "Volume": "bar"
+        }
+    },
+    "axis": {
+        "x": {
+            "type": "timeseries",
+            "tick": {
+                "format": "%Y-%m-%d"
+            }
+        },
+        "y": {
+            "label": {
+                "text": "Close",
+                "position": "outer-middle"
+            }
+        },
+        "y2": {
+            "show": true,
+            "label": {
+                "text": "Signal",
+                "position": "outer-middle"
+            }
+        }
+    }
+}
