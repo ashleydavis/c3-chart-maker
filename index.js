@@ -7,6 +7,8 @@
 //      inputFilePath -     The input CSV file to load.
 //      chartTemplateFile - Path to a C3 spec file (either json or js).
 //      outputFilePath -    Path that specifies where to save the chart's output image.
+//      options -           Options to control rendering.
+//          show            Set to true to show the browser window that renderers the chart.
 //
 
 const Nightmare = require('nightmare');
@@ -96,5 +98,15 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
                 .screenshot(outputFilePath, rect);
         })
         //.then(() => nightmare.screenshot("whole-page.png"))
-        .then(() => nightmare.end());
+        .then(() => {
+            console.log('Normal shutdown.');
+            return nightmare.end();
+        })
+        .catch(err => {
+            console.log('Error shutdown.');
+            return nightmare.end()
+                .then(() => {
+                    throw err
+                });
+        })
 };

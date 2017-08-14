@@ -7,7 +7,7 @@
 //
 
 const argv = require('yargs').argv;
-const chartMaker = require('./index');
+const c3ChartMaker = require('./index');
 
 if (argv.v || argv.version) {
     var fs = require('fs');
@@ -42,7 +42,7 @@ if (argv.show) {
     options.show = true;
 }
 
-chartMaker(inputFilePath, chartTemplateFilePath, outputFilePath, options)
+c3ChartMaker(inputFilePath, chartTemplateFilePath, outputFilePath, options)
     .then(() => { 
         console.log('Done');
     })
