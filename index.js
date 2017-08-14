@@ -22,6 +22,9 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
     assert.isString(chartTemplateFilePath, "c3-chart-maker: Expected parameter chartTemplateFilePath to be a string.");
     assert.isString(outputFilePath, "c3-chart-maker: Expected parameter outputFilePath to be a string.");
 
+    console.log('PWD: ' + process.cwd());
+    console.log('__dirname: ' + __dirname);
+
     options = options || {};
 
     var dataFrame = dataForge.readFileSync(inputFilePath)
