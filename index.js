@@ -30,6 +30,16 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
         show: options.show,
     });
 
+    nightmare.on('page', () => {
+        console.log('page event');
+        console.log(arguments);
+    });
+
+    nightmare.on('console', () => {
+        console.log('console');
+        console.log(arguments);
+    });
+
     var filePath = path.join(__dirname, 'template.html');
     var url = 'file://' + filePath;
     var selector = '#view svg';

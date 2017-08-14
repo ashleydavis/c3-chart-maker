@@ -47,5 +47,6 @@ chartMaker(inputFilePath, chartTemplateFilePath, outputFilePath, options)
         console.log('Done');
     })
     .catch(err => {
-        console.error(err);
+        console.error("Error rendering chart:");
+        console.error(err && err.stack || err);
     })

@@ -1,6 +1,6 @@
 {
   "name": "c3-chart-maker",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A Node.js module and CLI tool for rendering a chart from a CSV file using a C3 spec.",
   "homepage": "https://github.com/codecapers/c3-chart-maker",
   "repository": {
