@@ -22,9 +22,6 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
     assert.isString(chartTemplateFilePath, "c3-chart-maker: Expected parameter chartTemplateFilePath to be a string.");
     assert.isString(outputFilePath, "c3-chart-maker: Expected parameter outputFilePath to be a string.");
 
-    console.log('PWD: ' + process.cwd());
-    console.log('__dirname: ' + __dirname);
-
     options = options || {};
 
     var dataFrame = dataForge.readFileSync(inputFilePath)
@@ -33,11 +30,6 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
     var nightmare = new Nightmare({
         frame: false,
         show: options.show,
-    });
-
-    nightmare.on('page', function () {
-        console.log('page event');
-        console.log(arguments);
     });
 
     nightmare.on('console', function (type, message) {
@@ -55,9 +47,6 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
         if (type === 'error') {
             throw new Error("Browser JavaScript error: " + message);
         }
-
-        console.log('console');
-        console.log(arguments);
     });
 
     var filePath = path.join(__dirname, 'template.html');
