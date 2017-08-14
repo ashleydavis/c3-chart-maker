@@ -15,17 +15,19 @@ const path = require('path');
 const assert = require('chai').assert;
 const fs = require('fs');
 
-module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath) {
+module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath, options) {
     assert.isString(inputFilePath, "c3-chart-maker: Expected parameter inputFilePath to be a string.");
     assert.isString(chartTemplateFilePath, "c3-chart-maker: Expected parameter chartTemplateFilePath to be a string.");
     assert.isString(outputFilePath, "c3-chart-maker: Expected parameter outputFilePath to be a string.");
+
+    options = options || {};
 
     var dataFrame = dataForge.readFileSync(inputFilePath)
         .parseCSV();
 
     var nightmare = new Nightmare({
         frame: false,
-        //show: true,
+        show: options.show,
     });
 
     var filePath = path.join(__dirname, 'template.html');

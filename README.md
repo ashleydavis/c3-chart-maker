@@ -15,11 +15,17 @@ This library uses [Data-Forge](http://www.data-forge-js.com/), [Nightmare](http:
 
 ### Usage
 
-    c3-chart-maker <input-file> --chart=<c3-chart-file> --out=<output-image-file>
+    c3-chart-maker <input-file> --chart=<c3-chart-file> --out=<output-image-file> [--show]
+
+### Options
+
+    chart       Specifies the file that defines the chart.
+    out         Specifies the name of the image file to output for the chart.
+    show        Optional parameter that shows the browser that renders the chart.
 
 ### Example
 
-    c3-chart-maker myspreadsheet.csv --chart=mychartspec.json --out=mychart.png
+    c3-chart-maker myspreadsheet.csv --chart=mychartspec.json --out=mychart.png --show
 
 ## Use as a code library
 
@@ -34,8 +40,11 @@ This library uses [Data-Forge](http://www.data-forge-js.com/), [Nightmare](http:
     var inputFilePath = "your-input-file.csv";
     var chartTemplateFilePath = "my-chart-spec.json";
     var outputFilePath = "your-chart-output-file.png";
+    var options: {
+        show: true // Show browser used to render the chart.
+    };
 
-    c3ChartMaker(inputFilePath, chartTemplateFilePath, outputFilePath)
+    c3ChartMaker(inputFilePath, chartTemplateFilePath, outputFilePath, options)
         .then(() => { 
             console.log('Done');
         })

@@ -37,8 +37,12 @@ if (!argv.out) {
 var inputFilePath = argv._[0].toString();
 var chartTemplateFilePath = argv.chart.toString();
 var outputFilePath = argv.out.toString();
+var options = {};
+if (argv.show) {
+    options.show = true;
+}
 
-chartMaker(inputFilePath, chartTemplateFilePath, outputFilePath)
+chartMaker(inputFilePath, chartTemplateFilePath, outputFilePath, options)
     .then(() => { 
         console.log('Done');
     })
