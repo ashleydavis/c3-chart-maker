@@ -32,12 +32,27 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
         show: options.show,
     });
 
-    nightmare.on('page', () => {
+    nightmare.on('page', function () {
         console.log('page event');
         console.log(arguments);
     });
 
-    nightmare.on('console', () => {
+    nightmare.on('console', function (type, message) {
+
+        if (type === 'log') {
+            console.log('LOG: ' + message);
+            return; // Don't bother with logs.
+        }
+
+        if (type === 'warn') {
+            console.warn('LOG: ' + message);
+            return;
+        }
+
+        if (type === 'error') {
+            throw new Error("Browser JavaScript error: " + message);
+        }
+
         console.log('console');
         console.log(arguments);
     });
@@ -99,11 +114,9 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
         })
         //.then(() => nightmare.screenshot("whole-page.png"))
         .then(() => {
-            console.log('Normal shutdown.');
             return nightmare.end();
         })
         .catch(err => {
-            console.log('Error shutdown.');
             return nightmare.end()
                 .then(() => {
                     throw err
