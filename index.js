@@ -89,8 +89,9 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
         var series = Object.keys(chart.series);
         series.forEach(seriesName => {
             var dataSeries = chart.series[seriesName];
-
-            dataFrame = dataFrame.parseFloats(dataSeries).bake();
+            if (seriesName !== "x") {
+                dataFrame = dataFrame.parseFloats(dataSeries).bake();
+            }
 
             chart.data.columns.push(
                 [seriesName].concat(
