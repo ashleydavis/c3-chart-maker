@@ -1,3 +1,5 @@
+'use strict';
+
 //
 // This is a function to generate a chart using Nightmare, Data-Forge and C3.
 // Please see README.md for examples.
@@ -16,6 +18,7 @@ const dataForge = require('data-forge');
 const path = require('path');
 const assert = require('chai').assert;
 const fs = require('fs');
+const argv = require('yargs').argv;
 
 module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath, options) {
     assert.isString(inputFilePath, "c3-chart-maker: Expected parameter inputFilePath to be a string.");
@@ -53,10 +56,20 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
     var url = 'file://' + filePath;
     var selector = '#view svg';
 
-    var chart = JSON.parse(fs.readFileSync(chartTemplateFilePath, 'utf-8'));
+    var chart = null;
 
-    if (!chart.series) {
-        throw new Error("Chart spec must have an 'series' hash that maps the columns in the CSV file to series in the chart.");
+    if (chartTemplateFilePath.endsWith(".json")) {
+        // Load json file.
+        chart = JSON.parse(fs.readFileSync(chartTemplateFilePath, 'utf-8'));
+
+    }
+    else if (chartTemplateFilePath.endsWith(".js")) {
+        // Load Node.js module.
+        var fullPath = path.resolve(chartTemplateFilePath);
+        chart = require(fullPath)(dataFrame, argv);
+    }
+    else {
+        throw new Error("Unable to determine type of input file " + chartTemplateFilePath + ", expected a .json or .js file." );
     }
 
     if (!chart.data) {
@@ -68,25 +81,56 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
     }
 
     chart.bindto = "#view";
-    chart.data.x = "x";
+    if (!chart.data.x) {
+        chart.data.x = "x";
+    }
 
-    var series = Object.keys(chart.series);
-    series.forEach(seriesName => {
-        chart.data.columns.push(
-            [seriesName].concat(
-                dataFrame.getSeries(chart.series[seriesName])
-                    .select(v => v === undefined ? null : v)
-                    .toArray()
+    if (chart.series) {
+        var series = Object.keys(chart.series);
+        series.forEach(seriesName => {
+            chart.data.columns.push(
+                [seriesName].concat(
+                    dataFrame.getSeries(chart.series[seriesName])
+                        .select(v => v === undefined ? null : v)
+                        .toArray()
+                )
             )
-        )
-    });
+        });
+    }
 
-    return nightmare
-        .goto(url)
-        .evaluate(chart => {
-            c3.generate(chart);
-        }, chart)
-        .wait(selector)
+    nightmare.goto(url);
+
+    if (!chart) {
+        nightmare.evaluate(chart => {
+            // Setup module.
+            global.module = {};
+        });
+
+        // Inject js file.
+        nightmare.inject('js', chartTemplateFilePath);
+
+        nightmare.evaluate(data => {
+            
+            // Execute injected module.
+            module.exports(data);
+
+        }, dataFrame.toArray());
+    }
+    else {
+        nightmare.evaluate(chart => {
+            if (chart) {
+                // Add chart data.
+                c3.generate(chart);
+            }
+            else {
+                // Inject JS file and execute.
+                global.module = {};
+                nightmare.inject()
+            }
+        }, chart);
+    }
+        
+    return nightmare.wait(selector)
         .evaluate(selector => {
             const body = document.querySelector('body');
             const element = document.querySelector(selector);
