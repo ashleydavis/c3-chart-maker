@@ -56,3 +56,5 @@ This library uses [Data-Forge](http://www.data-forge-js.com/), [Nightmare](http:
 ## TODO
 
     Need to be able to merge multiple csv files.
+    Should be able to plug blanks in the chart template with command line parameters.
+    Need to be able to include CSS template for the chart so that it can be styled.
