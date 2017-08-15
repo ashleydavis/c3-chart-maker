@@ -88,9 +88,13 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
     if (chart.series) {
         var series = Object.keys(chart.series);
         series.forEach(seriesName => {
+            var dataSeries = chart.series[seriesName];
+
+            dataFrame = dataFrame.parseFloats(dataSeries).bake();
+
             chart.data.columns.push(
                 [seriesName].concat(
-                    dataFrame.getSeries(chart.series[seriesName])
+                    dataFrame.getSeries(dataSeries)
                         .select(v => v === undefined ? null : v)
                         .toArray()
                 )
