@@ -103,6 +103,10 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
         });
     }
 
+    if (argv.dumpChart) {
+        console.log(JSON.stringify(chart, null, 4));
+    }
+
     nightmare.goto(url);
 
     if (!chart) {
