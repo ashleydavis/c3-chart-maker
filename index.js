@@ -81,9 +81,6 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
     }
 
     chart.bindto = "#view";
-    if (!chart.data.x) {
-        chart.data.x = "x";
-    }
 
     if (chart.series) {
         var series = Object.keys(chart.series);
