@@ -42,6 +42,10 @@ if (argv.show) {
     options.show = true;
 }
 
+if (argv.css) {
+    options.cssFilePath = argv.css;
+}
+
 c3ChartMaker(inputFilePath, chartTemplateFilePath, outputFilePath, options)
     .then(() => { 
         console.log('Done');

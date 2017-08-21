@@ -27,6 +27,10 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
 
     options = options || {};
 
+    if (options.cssFilePath) {
+        assert.isString(options.cssFilePath, "c3-chart-maker: Expected options.cssFilePath (if specified) to be a string.")
+    }
+
     var dataFrame = dataForge.readFileSync(inputFilePath)
         .parseCSV();
 
@@ -105,6 +109,10 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
     }
 
     nightmare.goto(url);
+
+    if (options.cssFilePath) {
+        nightmare.inject('css', options.cssFilePath);
+    }
 
     if (!chart) {
         nightmare.evaluate(chart => {

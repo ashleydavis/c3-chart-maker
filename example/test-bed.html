@@ -2,6 +2,12 @@
     <link href="bower_components/c3/c3.css" rel="stylesheet">
     <script src="bower_components/d3/d3.js" charset="utf-8"></script>
     <script src="bower_components/c3/c3.js"></script>    
+
+    <style>
+        svg .c3-circle {
+            opacity: 1 !important;
+        }
+    </style>
 </head>
 <body style="background-color: white;">
 <div id="view"></div>
@@ -2828,6 +2834,9 @@
                     position: 'outer-middle'
                 }
             },
+        },
+        point: {
+            show: false,
         }
     };
 

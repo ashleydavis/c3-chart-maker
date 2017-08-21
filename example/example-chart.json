@@ -9,6 +9,7 @@
         "Volume": "Volume"
     },
     "data": {
+        "x": "x",
         "type": "line",
         "axes": {
             "Volume": "y2"

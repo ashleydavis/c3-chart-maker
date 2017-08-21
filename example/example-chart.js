@@ -20,6 +20,7 @@ module.exports = function (dataFrame, argv) {
             "Volume": "Volume"
         },
         "data": {
+            "x": "x",
             "type": "line",
             "axes": {
                 "Volume": "y2"
