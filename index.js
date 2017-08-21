@@ -115,35 +115,10 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
             .wait(10)
     }
 
-    if (!chart) {
-        nightmare.evaluate(chart => {
-            // Setup module.
-            global.module = {};
-        });
-
-        // Inject js file.
-        nightmare.inject('js', chartTemplateFilePath);
-
-        nightmare.evaluate(data => {
-            
-            // Execute injected module.
-            module.exports(data);
-
-        }, dataFrame.toArray());
-    }
-    else {
-        nightmare.evaluate(chart => {
-            if (chart) {
-                // Add chart data.
-                c3.generate(chart);
-            }
-            else {
-                // Inject JS file and execute.
-                global.module = {};
-                nightmare.inject()
-            }
-        }, chart);
-    }
+    nightmare.evaluate(chart => {
+        // Add chart data.
+        c3.generate(chart);
+    }, chart);
         
     return nightmare.wait(selector)
         .evaluate(selector => {
