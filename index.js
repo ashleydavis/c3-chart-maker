@@ -112,7 +112,7 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
 
     if (options.cssFilePath) {
         nightmare.inject('css', options.cssFilePath)
-            .wait(10)
+            .wait(250);
     }
 
     nightmare.evaluate(chart => {
