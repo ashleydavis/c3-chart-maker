@@ -34,10 +34,16 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
     var dataFrame = dataForge.readFileSync(inputFilePath)
         .parseCSV();
 
-    var nightmare = nightmare || new Nightmare({
-        frame: false,
-        show: options.show,
-    });
+    var ownNightmare = false;
+
+    if (!nightmare) {
+        ownNightmare = true;
+        nightmare = new Nightmare({
+            frame: false,
+            show: options.show,
+        });
+    }
+
 
     nightmare.on('console', function (type, message) {
 
@@ -139,12 +145,19 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
         })
         //.then(() => nightmare.screenshot("whole-page.png"))
         .then(() => {
-            return nightmare.end();
+            if (ownNightmare) {
+                return nightmare.end();
+            }
         })
         .catch(err => {
-            return nightmare.end()
-                .then(() => {
-                    throw err
-                });
+            if (ownNightmare) {
+                return nightmare.end()
+                    .then(() => {
+                        throw err
+                    });
+            }
+            else {
+                        throw err
+            }
         });
 };
