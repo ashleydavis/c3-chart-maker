@@ -20,7 +20,7 @@ const assert = require('chai').assert;
 const fs = require('fs');
 const argv = require('yargs').argv;
 
-module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath, options) {
+module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath, options, nightmare) {
     assert.isString(inputFilePath, "c3-chart-maker: Expected parameter inputFilePath to be a string.");
     assert.isString(chartTemplateFilePath, "c3-chart-maker: Expected parameter chartTemplateFilePath to be a string.");
     assert.isString(outputFilePath, "c3-chart-maker: Expected parameter outputFilePath to be a string.");
@@ -34,7 +34,7 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
     var dataFrame = dataForge.readFileSync(inputFilePath)
         .parseCSV();
 
-    var nightmare = new Nightmare({
+    var nightmare = nightmare || new Nightmare({
         frame: false,
         show: options.show,
     });
@@ -146,5 +146,5 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
                 .then(() => {
                     throw err
                 });
-        })
+        });
 };
