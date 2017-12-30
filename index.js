@@ -20,9 +20,11 @@ const assert = require('chai').assert;
 const fs = require('fs');
 const argv = require('yargs').argv;
 
-module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath, options, nightmare) {
-    assert.isString(inputFilePath, "c3-chart-maker: Expected parameter inputFilePath to be a string.");
-    assert.isString(chartTemplateFilePath, "c3-chart-maker: Expected parameter chartTemplateFilePath to be a string.");
+module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChartDefinition, outputFilePath, options, nightmare) {
+    var isChartDefFilePath = typeof(chartTemplateFilePathOrChartDefinition) === "string";
+    if (!isChartDefFilePath) {
+        assert.isObject(chartTemplateFilePathOrChartDefinition, "c3-chart-maker: Expected parameter chartTemplateFilePathOrChartDefinition to be a string (a path to the chart definition JSON file) or an object (the chart definition itself).");
+    }
     assert.isString(outputFilePath, "c3-chart-maker: Expected parameter outputFilePath to be a string.");
 
     options = options || {};
@@ -31,8 +33,15 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
         assert.isString(options.cssFilePath, "c3-chart-maker: Expected options.cssFilePath (if specified) to be a string.")
     }
 
-    var dataFrame = dataForge.readFileSync(inputFilePath)
-        .parseCSV();
+    var dataFrame;
+    var isInputFilePath = typeof(inputFilePathOrDataFrame) === "string";
+    if (isInputFilePath) {
+        dataFrame = dataForge.readFileSync(inputFilePathOrDataFrame)
+            .parseCSV();
+    }
+    else {
+        dataFrame = inputFilePathOrDataFrame;        
+    }
 
     var ownNightmare = false;
 
@@ -68,18 +77,23 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
 
     var chart = null;
 
-    if (chartTemplateFilePath.endsWith(".json")) {
-        // Load json file.
-        chart = JSON.parse(fs.readFileSync(chartTemplateFilePath, 'utf-8'));
-
-    }
-    else if (chartTemplateFilePath.endsWith(".js")) {
-        // Load Node.js module.
-        var fullPath = path.resolve(chartTemplateFilePath);
-        chart = require(fullPath)(dataFrame, argv);
+    if (isChartDefFilePath) {
+        var chartTemplateFilePath = chartTemplateFilePathOrChartDefinition;
+        if (chartTemplateFilePath.endsWith(".json")) {
+            // Load json file.
+            chart = JSON.parse(fs.readFileSync(chartTemplateFilePath, 'utf-8'));
+        }
+        else if (chartTemplateFilePath.endsWith(".js")) {
+            // Load Node.js module.
+            var fullPath = path.resolve(chartTemplateFilePath);
+            chart = require(fullPath)(dataFrame, argv);
+        }
+        else {
+            throw new Error("Unable to determine type of input file " + chartTemplateFilePath + ", expected a .json or .js file." );
+        }
     }
     else {
-        throw new Error("Unable to determine type of input file " + chartTemplateFilePath + ", expected a .json or .js file." );
+        chart = chartTemplateFilePathOrChartDefinition;
     }
 
     if (!chart.data) {
@@ -96,7 +110,7 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
         var series = Object.keys(chart.series);
         series.forEach(seriesName => {
             var dataSeries = chart.series[seriesName];
-            if (seriesName !== "x") {
+            if (isInputFilePath && seriesName !== "x") {
                 dataFrame = dataFrame.parseFloats(dataSeries).bake();
             }
 
@@ -110,7 +124,7 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
         });
     }
 
-    if (argv.dumpChart) {
+    if (argv.dumpChart) { //TODO: This should be an API option.
         console.log(JSON.stringify(chart, null, 4));
     }
 
@@ -157,7 +171,7 @@ module.exports = function (inputFilePath, chartTemplateFilePath, outputFilePath,
                     });
             }
             else {
-                        throw err
+                throw err
             }
         });
 };

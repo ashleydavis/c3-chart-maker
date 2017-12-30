@@ -48,7 +48,7 @@ For help please see [this exmple repo](https://github.com/ashleydavis/nodejs-cha
         cssFilePath: "your-css-file.css", // Optional CSS file to style the chart.
     };
 
-    c3ChartMaker(inputFilePath, chartTemplateFilePath, outputFilePath, options)
+    c3ChartMaker.fromFile(inputFilePath, chartTemplateFilePath, outputFilePath, options)
         .then(() => { 
             console.log('Done');
         })
