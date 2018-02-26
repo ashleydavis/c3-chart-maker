@@ -17,7 +17,7 @@ For help please see [this exmple repo](https://github.com/ashleydavis/nodejs-cha
 
 ### Usage
 
-    c3-chart-maker <input-file> --chart=<c3-chart-file> --out=<output-image-file> [--css=<css-file-path>] [--show]
+    c3-chart-maker <input-file> --chart=<c3-chart-file> --out=<output-image-file> [--css=<css-file-path>] [--show] [--dump-chart]
 
 ### Options
 
@@ -25,10 +25,12 @@ For help please see [this exmple repo](https://github.com/ashleydavis/nodejs-cha
     out         Specifies the name of the image file to output for the chart.
     css         Specifies a CSS file that styles the chart.
     show        Optional parameter that shows the browser that renders the chart.
+    dump-chart  Dump the expanded chart definition to standard out for debugging.
+
 
 ### Example
 
-    c3-chart-maker myspreadsheet.csv --chart=mychartspec.json --out=mychart.png -ccss=mycssfile.css --show
+    c3-chart-maker myspreadsheet.csv --chart=mychartspec.json --out=mychart.png --css=mycssfile.css --show --dump-chart
 
 ## Use as a code library
 
@@ -40,12 +42,13 @@ For help please see [this exmple repo](https://github.com/ashleydavis/nodejs-cha
 
     const c3ChartMaker = require('c3-chart-maker');
     
-    var inputFilePath = "your-input-file.csv";
-    var chartTemplateFilePath = "my-chart-spec.json";
+    var inputFilePath = "your-input-file.csv"; // NOTE: This can also be a DataForge dataframe.
+    var chartTemplateFilePath = "my-chart-spec.json"; // NOTE: This can also be inline JSON.
     var outputFilePath = "your-chart-output-file.png";
     var options: {
-        show: true // Show browser used to render the chart.
-        cssFilePath: "your-css-file.css", // Optional CSS file to style the chart.
+        show: true                  // Show browser used to render the chart.
+        css: "your-css-file.css",   // Optional CSS file to style the chart.
+        dumpChart: true,            // Dump the expanded chart definition to the console for debugging.
     };
 
     c3ChartMaker.fromFile(inputFilePath, chartTemplateFilePath, outputFilePath, options)

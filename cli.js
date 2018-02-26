@@ -37,14 +37,7 @@ if (!argv.out) {
 var inputFilePath = argv._[0].toString();
 var chartTemplateFilePath = argv.chart.toString();
 var outputFilePath = argv.out.toString();
-var options = {};
-if (argv.show) {
-    options.show = true;
-}
-
-if (argv.css) {
-    options.cssFilePath = argv.css;
-}
+var options = argv;
 
 c3ChartMaker(inputFilePath, chartTemplateFilePath, outputFilePath, options)
     .then(() => { 

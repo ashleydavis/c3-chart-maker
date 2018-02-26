@@ -18,7 +18,6 @@ const dataForge = require('data-forge');
 const path = require('path');
 const assert = require('chai').assert;
 const fs = require('fs');
-const argv = require('yargs').argv;
 
 module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChartDefinition, outputFilePath, options, nightmare) {
     var isChartDefFilePath = typeof(chartTemplateFilePathOrChartDefinition) === "string";
@@ -29,8 +28,8 @@ module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChar
 
     options = options || {};
 
-    if (options.cssFilePath) {
-        assert.isString(options.cssFilePath, "c3-chart-maker: Expected options.cssFilePath (if specified) to be a string.")
+    if (options.css) {
+        assert.isString(options.css, "c3-chart-maker: Expected options.cssFilePath (if specified) to be a string.")
     }
 
     var dataFrame;
@@ -85,7 +84,7 @@ module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChar
         else if (chartTemplateFilePath.endsWith(".js")) {
             // Load Node.js module.
             var fullPath = path.resolve(chartTemplateFilePath);
-            chart = require(fullPath)(dataFrame, argv);
+            chart = require(fullPath)(dataFrame, options);
         }
         else {
             throw new Error("Unable to determine type of input file " + chartTemplateFilePath + ", expected a .json or .js file." );
@@ -126,14 +125,14 @@ module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChar
         chart.data.json = dataFrame.toArray();
     }
 
-    if (argv.dumpChart) { //TODO: This should be an API option.
+    if (options.dumpChart) {
         console.log(JSON.stringify(chart, null, 4));
     }
 
     nightmare.goto(url);
 
-    if (options.cssFilePath) {
-        nightmare.inject('css', options.cssFilePath);
+    if (options.css) {
+        nightmare.inject('css', options.css);
     }
 
     nightmare.evaluate(chart => {
