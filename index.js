@@ -135,6 +135,10 @@ module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChar
         nightmare.inject('css', options.css);
     }
 
+    //TODO: compose/build the entire chart in a temporary sub directory and render it from there.
+
+    //TODO: If the chart def is a JSON file it could load it using AJAX and then it could contain code to configure the chart.
+
     nightmare.evaluate(chart => {
         // Add chart data.
         c3.generate(chart);
