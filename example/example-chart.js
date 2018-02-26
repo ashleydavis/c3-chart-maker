@@ -61,6 +61,9 @@ module.exports = function (dataFrame, argv) {
         },
         "point": {
             "show": false   
+        },
+        "transition": {
+            "duration": 0
         }
     };
 };

@@ -53,7 +53,6 @@ module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChar
         });
     }
 
-
     nightmare.on('console', function (type, message) {
 
         if (type === 'log') {
@@ -100,13 +99,13 @@ module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChar
         chart.data = {};
     }
 
-    if (!chart.data.columns) {
-        chart.data.columns = [];
-    }
-
     chart.bindto = "#view";
 
     if (chart.series) {
+        if (!chart.data.columns) {
+            chart.data.columns = [];
+        }
+
         var series = Object.keys(chart.series);
         series.forEach(seriesName => {
             var dataSeries = chart.series[seriesName];
@@ -122,6 +121,9 @@ module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChar
                 )
             )
         });
+    }
+    else {
+        chart.data.json = dataFrame.toArray();
     }
 
     if (argv.dumpChart) { //TODO: This should be an API option.
