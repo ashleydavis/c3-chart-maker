@@ -131,7 +131,7 @@ module.exports = function (inputData, chartDefinition, outputFilePath, options, 
             )
         });
     }
-    else {
+    else if (!chart.data.columns && !chart.data.json) {
         chart.data.json = data;
     }
 
