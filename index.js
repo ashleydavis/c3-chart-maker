@@ -127,7 +127,7 @@ module.exports = function (inputData, chartDefinition, outputFilePath, options, 
         var dataFrame = new dataForge.DataFrame(data);
         series.forEach(seriesName => {
             var dataSeries = chart.series[seriesName];
-            if (isInputFilePath && seriesName !== "x") {
+            if (Sugar.Object.isString(inputData) && seriesName !== "x") {
                 dataFrame = dataFrame.parseFloats(dataSeries).bake();
             }
 
