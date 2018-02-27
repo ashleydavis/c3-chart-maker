@@ -1,6 +1,10 @@
 'use strict';
 
-module.exports = function (dataFrame, argv) {
+const dataForge = require('data-forge');
+
+module.exports = function (data, argv) {
+
+    let dataFrame = new dataForge.DataFrame(data);
 
     var x = 0;
     var tickValues = dataFrame.getSeries("Date")
