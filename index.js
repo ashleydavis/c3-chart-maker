@@ -79,33 +79,6 @@ module.exports = function (inputData, chartDefinition, outputFilePath, options, 
         data = inputData.toArray(); // Assume DataFrame.
     }
 
-    var ownNightmare = false;
-
-    if (!nightmare) {
-        ownNightmare = true;
-        nightmare = new Nightmare({
-            frame: false,
-            show: options.show,
-        });
-    }
-
-    nightmare.on('console', function (type, message) {
-
-        if (type === 'log') {
-            console.log('LOG: ' + message);
-            return; // Don't bother with logs.
-        }
-
-        if (type === 'warn') {
-            console.warn('LOG: ' + message);
-            return;
-        }
-
-        if (type === 'error') {
-            throw new Error("Browser JavaScript error: " + message);
-        }
-    });
-
     var chart = null;
 
     if (Sugar.Object.isString(chartDefinition)) {
@@ -183,6 +156,33 @@ module.exports = function (inputData, chartDefinition, outputFilePath, options, 
     var filePath = path.join(chartTemplateOutputPath, 'index.html');
     var url = 'file://' + filePath;
     var selector = 'svg';
+
+    var ownNightmare = false;
+
+    if (!nightmare) {
+        ownNightmare = true;
+        nightmare = new Nightmare({
+            frame: false,
+            show: options.show,
+        });
+    }
+
+    nightmare.on('console', function (type, message) {
+
+        if (type === 'log') {
+            console.log('LOG: ' + message);
+            return; // Don't bother with logs.
+        }
+
+        if (type === 'warn') {
+            console.warn('LOG: ' + message);
+            return;
+        }
+
+        if (type === 'error') {
+            throw new Error("Browser JavaScript error: " + message);
+        }
+    });
 
     nightmare.goto(url);
 
