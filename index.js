@@ -139,10 +139,10 @@ module.exports = function (inputData, chartDefinition, outputFilePath, options, 
         console.log(JSON.stringify(chart, null, 4));
     }
 
-    const chartTemplateInputPath = options.template || path.join(__dirname, "template");
+    const chartTemplateInputPath = options.template && path.resolve(options.template) || path.join(__dirname, "template");
     verbose("<< Using chart template " + chartTemplateInputPath);
 
-    const chartTemplateOutputPath = options.export || path.join(__dirname, "chart-tmp");
+    const chartTemplateOutputPath = options.export && path.resolve(options.export) || path.join(__dirname, "chart-tmp");
     verbose(">> Outputing interactive chart to " + chartTemplateOutputPath);
 
     verbose(">> Outputing rendered chart to " + outputFilePath);
