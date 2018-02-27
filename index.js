@@ -13,6 +13,7 @@
 //          show            Set to true to show the browser window that renderers the chart.
 //          export          Path to export the chart to (can be used to inspect interactive chart later).
 //			template 		Optionaly wet the template used to render the chart.
+//          verbose         Set to true for debug output.
 //
 
 const Nightmare = require('nightmare');
@@ -40,30 +41,41 @@ function composeChartTemplate (chartTemplateInputPath, chartTemplateOutputPath, 
 };
 
 module.exports = function (inputData, chartDefinition, outputFilePath, options, nightmare) {
-    assert.isString(outputFilePath, "c3-chart-maker: Expected parameter outputFilePath to be a string.");
+    assert.isString(outputFilePath, "c3-chart-maker: Expected parameter outputFilePath to be a string.");    
 
     options = options || {};
 
-    if (options.css) {
-        assert.isString(options.css, "c3-chart-maker: Expected options.cssFilePath (if specified) to be a string.")
-    }
+    function verbose (msg) {
+        if (options.verbose) {
+            console.log(msg);
+        }    
+    };   
+
+    verbose("Rendering chart to " + outputFilePath);
 
     var data;
     if (Sugar.Object.isString(inputData))  {
         if (inputData.endsWith(".csv")) {
+            verbose("<< Input from CSV file " + inputData);
+
             data = dataForge.readFileSync(inputData)
                 .parseCSV()
                 .toArray();
         }
         else { // Assume JSON file.
-            data = JSON.parse(fs.readFileSync(inputData))
+            verbose("<< Input from JSON file " + inputData);
 
+            data = JSON.parse(fs.readFileSync(inputData));
         }
     }
     else if (Sugar.Object.isArray(inputData)) {
+        verbose("<< Input from JavaScript array.");
+
         data = inputData;
     }
     else {
+        verbose("<< Input from DataForge DataFrame.");
+
         data = inputData.toArray(); // Assume DataFrame.
     }
 
@@ -98,10 +110,14 @@ module.exports = function (inputData, chartDefinition, outputFilePath, options, 
 
     if (Sugar.Object.isString(chartDefinition)) {
         if (chartDefinition.endsWith(".json")) {
+            verbose("<< Chart definition from JSON file " + chartDefinition);
+
             // Load json file.
             chart = JSON.parse(fs.readFileSync(chartDefinition, 'utf-8'));
         }
         else if (chartDefinition.endsWith(".js")) {
+            verbose("<< Chart definition from JavaScript file " + chartDefinition);
+
             // Load Node.js module.
             var fullPath = path.resolve(chartDefinition);
             chart = require(fullPath)(data, options);
@@ -119,6 +135,8 @@ module.exports = function (inputData, chartDefinition, outputFilePath, options, 
     }
 
     if (chart.series) { // THIS SECTION IS DEPRECATED.
+        console.error("Usage of deprecated field: 'series'.");
+
         if (!chart.data.columns) {
             chart.data.columns = [];
         }
@@ -148,11 +166,16 @@ module.exports = function (inputData, chartDefinition, outputFilePath, options, 
         console.log(JSON.stringify(chart, null, 4));
     }
 
+    const chartTemplateInputPath = options.template || path.join(__dirname, "template");
+    verbose("<< Using chart template " + chartTemplateInputPath);
+
     const chartTemplateOutputPath = options.export || path.join(__dirname, "chart-tmp");
-    console.log(">> Outputing interactive chart to " + chartTemplateOutputPath);
+    verbose(">> Outputing interactive chart to " + chartTemplateOutputPath);
+
+    verbose(">> Outputing rendered chart to " + outputFilePath);
 
     composeChartTemplate(
-        options.template || path.join(__dirname, "template"),
+        chartTemplateInputPath,
         chartTemplateOutputPath,
         chart        
     );

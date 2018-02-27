@@ -17,7 +17,7 @@ For help please see [this exmple repo](https://github.com/ashleydavis/nodejs-cha
 
 ### Usage
 
-    c3-chart-maker <input-file> --chart=<c3-chart-file> --out=<output-image-file> [--export=<folder>] [--template=<chart-template-folder>] [--show] [--dump-chart]
+    c3-chart-maker <input-file> --chart=<c3-chart-file> --out=<output-image-file> [--export=<folder>] [--template=<chart-template-folder>] [--show] [--dump-chart] [--verbose]
 
 ### Options
 
@@ -27,6 +27,7 @@ For help please see [this exmple repo](https://github.com/ashleydavis/nodejs-cha
     show        Optional parameter that shows the browser that renders the chart.
     dump-chart  Dump the expanded chart definition to standard out for debugging.
     template    Template directory that contains the HTML and CSS files for the chart. You can use this to completely override the chart template.
+    verbose     Enable this option for verbose debug output.
 
 
 ### Example
