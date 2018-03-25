@@ -1,4 +1,4 @@
-# Chart-maker
+# c3-chart-maker
 
 A Node.js module for rendering a chart from a CSV file using a [C3](http://c3js.org/) spec.
 
