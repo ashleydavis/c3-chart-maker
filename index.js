@@ -11,36 +11,151 @@
 //      outputFilePath -    Path that specifies where to save the chart's output image.
 //      options -           Options to control rendering.
 //          show            Set to true to show the browser window that renderers the chart.
+//          export          Path to export the chart to (can be used to inspect interactive chart later).
+//			template 		Optionaly wet the template used to render the chart.
+//          verbose         Set to true for debug output.
 //
 
 const Nightmare = require('nightmare');
 const dataForge = require('data-forge');
 const path = require('path');
 const assert = require('chai').assert;
-const fs = require('fs');
+const fs = require('fs-extra');
+const Sugar = require('sugar');
 
-module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChartDefinition, outputFilePath, options, nightmare) {
-    var isChartDefFilePath = typeof(chartTemplateFilePathOrChartDefinition) === "string";
-    if (!isChartDefFilePath) {
-        assert.isObject(chartTemplateFilePathOrChartDefinition, "c3-chart-maker: Expected parameter chartTemplateFilePathOrChartDefinition to be a string (a path to the chart definition JSON file) or an object (the chart definition itself).");
-    }
-    assert.isString(outputFilePath, "c3-chart-maker: Expected parameter outputFilePath to be a string.");
+function composeChartTemplate (chartTemplateInputPath, chartTemplateOutputPath, chartDefinition) {
+
+    fs.copySync(chartTemplateInputPath, chartTemplateOutputPath);
+
+    let chartJson = JSON.stringify(chartDefinition, null, 4);
+    chartJson = chartJson.split("\n").map(line => "        " + line).join("\n");
+
+    fs.writeFileSync(
+        path.join(chartTemplateOutputPath, "index.js"), 
+        "$(function () {\n" +
+        "    c3.generate(\n" + 
+        chartJson + "\n" +
+        "    );\n" +
+        "});"
+    );            
+};
+
+module.exports = function (inputData, chartDefinition, outputFilePath, options, nightmare) {
+    assert.isString(outputFilePath, "c3-chart-maker: Expected parameter outputFilePath to be a string.");    
 
     options = options || {};
 
-    if (options.css) {
-        assert.isString(options.css, "c3-chart-maker: Expected options.cssFilePath (if specified) to be a string.")
-    }
+    function verbose (msg) {
+        if (options.verbose) {
+            console.log(msg);
+        }    
+    };   
 
-    var dataFrame;
-    var isInputFilePath = typeof(inputFilePathOrDataFrame) === "string";
-    if (isInputFilePath) {
-        dataFrame = dataForge.readFileSync(inputFilePathOrDataFrame)
-            .parseCSV();
+    verbose("Rendering chart to " + outputFilePath);
+
+    var data;
+    if (Sugar.Object.isString(inputData))  {
+        if (inputData.endsWith(".csv")) {
+            verbose("<< Input from CSV file " + inputData);
+
+            data = dataForge.readFileSync(inputData)
+                .parseCSV()
+                .toArray();
+        }
+        else { // Assume JSON file.
+            verbose("<< Input from JSON file " + inputData);
+
+            data = JSON.parse(fs.readFileSync(inputData));
+        }
+    }
+    else if (Sugar.Object.isArray(inputData)) {
+        verbose("<< Input from JavaScript array.");
+
+        data = inputData;
     }
     else {
-        dataFrame = inputFilePathOrDataFrame;        
+        verbose("<< Input from DataForge DataFrame.");
+
+        data = inputData.toArray(); // Assume DataFrame.
     }
+
+    var chart = null;
+
+    if (Sugar.Object.isString(chartDefinition)) {
+        if (chartDefinition.endsWith(".json")) {
+            verbose("<< Chart definition from JSON file " + chartDefinition);
+
+            // Load json file.
+            chart = JSON.parse(fs.readFileSync(chartDefinition, 'utf-8'));
+        }
+        else if (chartDefinition.endsWith(".js")) {
+            verbose("<< Chart definition from JavaScript file " + chartDefinition);
+
+            // Load Node.js module.
+            var fullPath = path.resolve(chartDefinition);
+            chart = require(fullPath)(data, options);
+        }
+        else {  
+            throw new Error("Unable to determine type of input file " + chartDefinition + ", expected a .json or .js file." );
+        }
+    }
+    else {
+        chart = chartDefinition;
+    }
+
+    if (!chart.data) {
+        chart.data = {};
+    }
+
+    if (chart.series) { // THIS SECTION IS DEPRECATED.
+        console.error("Usage of deprecated field: 'series'.");
+
+        if (!chart.data.columns) {
+            chart.data.columns = [];
+        }
+
+        var series = Object.keys(chart.series);
+        var dataFrame = new dataForge.DataFrame(data);
+        series.forEach(seriesName => {
+            var dataSeries = chart.series[seriesName];
+            if (Sugar.Object.isString(inputData) && seriesName !== "x") {
+                dataFrame = dataFrame.parseFloats(dataSeries).bake();
+            }
+
+            chart.data.columns.push(
+                [seriesName].concat(
+                    dataFrame.getSeries(dataSeries)
+                        .select(v => v === undefined ? null : v)
+                        .toArray()
+                )
+            )
+        });
+    }
+    else if (!chart.data.columns && !chart.data.json) {
+        chart.data.json = data;
+    }
+
+    if (options.dumpChart) {
+        console.log(JSON.stringify(chart, null, 4));
+    }
+
+    const chartTemplateInputPath = options.template && path.resolve(options.template) || path.join(__dirname, "template");
+    verbose("<< Using chart template " + chartTemplateInputPath);
+
+    const chartTemplateOutputPath = options.export && path.resolve(options.export) || path.join(__dirname, "chart-tmp");
+    verbose(">> Outputing interactive chart to " + chartTemplateOutputPath);
+
+    verbose(">> Outputing rendered chart to " + outputFilePath);
+
+    composeChartTemplate(
+        chartTemplateInputPath,
+        chartTemplateOutputPath,
+        chart        
+    );
+
+    var filePath = path.join(chartTemplateOutputPath, 'index.html');
+    var url = 'file://' + filePath;
+    var selector = 'svg';
 
     var ownNightmare = false;
 
@@ -69,81 +184,8 @@ module.exports = function (inputFilePathOrDataFrame, chartTemplateFilePathOrChar
         }
     });
 
-    var filePath = path.join(__dirname, 'template.html');
-    var url = 'file://' + filePath;
-    var selector = '#view svg';
-
-    var chart = null;
-
-    if (isChartDefFilePath) {
-        var chartTemplateFilePath = chartTemplateFilePathOrChartDefinition;
-        if (chartTemplateFilePath.endsWith(".json")) {
-            // Load json file.
-            chart = JSON.parse(fs.readFileSync(chartTemplateFilePath, 'utf-8'));
-        }
-        else if (chartTemplateFilePath.endsWith(".js")) {
-            // Load Node.js module.
-            var fullPath = path.resolve(chartTemplateFilePath);
-            chart = require(fullPath)(dataFrame, options);
-        }
-        else {
-            throw new Error("Unable to determine type of input file " + chartTemplateFilePath + ", expected a .json or .js file." );
-        }
-    }
-    else {
-        chart = chartTemplateFilePathOrChartDefinition;
-    }
-
-    if (!chart.data) {
-        chart.data = {};
-    }
-
-    chart.bindto = "#view";
-
-    if (chart.series) {
-        if (!chart.data.columns) {
-            chart.data.columns = [];
-        }
-
-        var series = Object.keys(chart.series);
-        series.forEach(seriesName => {
-            var dataSeries = chart.series[seriesName];
-            if (isInputFilePath && seriesName !== "x") {
-                dataFrame = dataFrame.parseFloats(dataSeries).bake();
-            }
-
-            chart.data.columns.push(
-                [seriesName].concat(
-                    dataFrame.getSeries(dataSeries)
-                        .select(v => v === undefined ? null : v)
-                        .toArray()
-                )
-            )
-        });
-    }
-    else {
-        chart.data.json = dataFrame.toArray();
-    }
-
-    if (options.dumpChart) {
-        console.log(JSON.stringify(chart, null, 4));
-    }
-
     nightmare.goto(url);
 
-    if (options.css) {
-        nightmare.inject('css', options.css);
-    }
-
-    //TODO: compose/build the entire chart in a temporary sub directory and render it from there.
-
-    //TODO: If the chart def is a JSON file it could load it using AJAX and then it could contain code to configure the chart.
-
-    nightmare.evaluate(chart => {
-        // Add chart data.
-        c3.generate(chart);
-    }, chart);
-        
     return nightmare.wait(selector)
         .evaluate(selector => {
             const body = document.querySelector('body');
