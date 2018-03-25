@@ -7,7 +7,9 @@ It's a great way to render server-side charts.
 
 This library uses [Data-Forge](http://www.data-forge-js.com/), [Nightmare](http://www.nightmarejs.org/) and [C3](http://c3js.org/).
 
-For help please see [this exmple repo](https://github.com/ashleydavis/nodejs-chart-rendering-example) and [this post on The Data Wrangler](http://www.the-data-wrangler.com/node-js-chart-rendering-with-c3-and-nightmare/).
+For help please see [this example repo](https://github.com/ashleydavis/nodejs-chart-rendering-example) and [this post on The Data Wrangler](http://www.the-data-wrangler.com/node-js-chart-rendering-with-c3-and-nightmare/).
+
+If you are interested in server-side / Node.js charting and visualization my book [Data Wrangling with JavaScript](http://bit.ly/2t2cJu2) has a whole chapter on this.
 
 ## Use from command line
 
