@@ -1,5 +1,7 @@
 # c3-chart-maker
 
+THIS CODE IS NO LONGER MAINTAINED: For server side rendering of charts I recommed you used [Data-Forge Plot](https://www.npmjs.com/package/data-forge-plot).
+
 A Node.js module for rendering a chart from a CSV file using a [C3](http://c3js.org/) spec.
 
 It can be used from the command line or as a code library.
